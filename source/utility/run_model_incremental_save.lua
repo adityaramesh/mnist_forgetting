@@ -130,7 +130,8 @@ function save_current_model(context, paths_, info)
 	local epoch = info.train.epoch
 	assert(epoch > 0)
 
-	local output_fn = paths.concat(paths_.output_dir, "model_" .. epoch .. "_epochs.t7")
+	local output_fn = paths.concat(paths_.output_dir, "model_" .. (epoch - 1) .. "_epochs.t7")
+	print("Saving current model to " .. output_fn .. ".")
 	torch.save(output_fn, info.model.model)
 end
 
