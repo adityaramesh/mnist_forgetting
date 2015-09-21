@@ -126,11 +126,11 @@ function make_context(info, class_count)
 	return context
 end
 
-function save_current_model(context, paths, info)
+function save_current_model(context, paths_, info)
 	local epoch = info.train.epoch
 	assert(epoch > 0)
 
-	local output_fn = paths.concat(paths.output_dir, "model_" .. epoch .. "_epochs.t7")
+	local output_fn = paths.concat(paths_.output_dir, "model_" .. epoch .. "_epochs.t7")
 	torch.save(output_fn, info.model.model)
 end
 
