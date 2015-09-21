@@ -15,6 +15,10 @@ local function do_train_epoch(data, context, paths, info)
 	local opt_state   = info.train.opt_state
 	local batch_size  = info.train.batch_size
 
+	if info.train.epoch == nil then
+		info.train.epoch = 1
+	end
+
 	local perm = torch.randperm(train_size)
 	model:training()
 	print("Starting training epoch " .. info.train.epoch .. ".")
@@ -95,7 +99,7 @@ local function do_valid_epoch(data, context, paths, info)
 	end
 end
 
-function make_context(info, class_count)
+function make_context(info, class_count, modify_grad_func)
 	local context = {}
 	local log_dir = paths.concat("models", info.options.model)
 	local log_path = paths.concat(log_dir, info.options.model .. "_output.log")
@@ -116,6 +120,7 @@ function make_context(info, class_count)
 		end
 
 		model:backward(input, criterion:backward(output, target))
+		modify_grad_func(info.options, model)
 		return loss
 	end
 
@@ -126,20 +131,13 @@ function make_context(info, class_count)
 	return context
 end
 
-function save_current_model(context, paths_, info)
-	local epoch = info.train.epoch
-	assert(epoch > 0)
+function run(task_info_func, model_info_func, train_info_func, options_func,
+	modify_grad_func)
 
-	local output_fn = paths.concat(paths_.output_dir, "model_" .. (epoch - 1) .. "_epochs.t7")
-	print("Saving current model to " .. output_fn .. ".")
-	torch.save(output_fn, info.model.model)
-end
-
-function run(task_info_func, model_info_func, train_info_func)
 	print("Loading data.")
 	local train_data, valid_data, class_count = task_info_func()
 	local do_train, _, paths, info = model_io.restore(
-		model_info_func, train_info_func)
+		model_info_func, train_info_func, options_func)
 
 	-- Since the training epoch count is only incremented after
 	-- serialization, the actual training epoch will always be one greater
@@ -148,20 +146,18 @@ function run(task_info_func, model_info_func, train_info_func)
 		info.train.epoch = info.train.epoch + 1
 	end
 
-	local context = make_context(info, class_count)
+	local context = make_context(info, class_count, modify_grad_func)
 	local valid_epoch_ratio = info.train.valid_epoch_ratio or 1
+	local max_epochs = 21
+
+	if info.train.max_epochs then
+		max_epochs = info.train.max_epochs + 1
+	end
+
 	print("")
 
-	info.train.epoch = 1
-
 	if do_train then
-		while info.train.epoch <= 81 do
-			-- At this point, `info.train.epoch` is the one-based
-			-- index of the epoch that is *about* to be performed.
-			if info.train.epoch % 10 == 1 then
-				save_current_model(context, paths, info)
-			end
-
+		while info.train.epoch == nil or info.train.epoch <= max_epochs do
 			do_train_epoch(train_data, context, paths, info)
 			print("")
 

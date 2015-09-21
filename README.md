@@ -8,15 +8,12 @@ weights were allowed to vary simultaneously?
 
 # Agenda
 
-- Create a version of `run_model.lua` file that saves the state of the model
-every 10 epochs to a new file. Train this model for 80 epochs so that we have a
-converged model and validation accuracy graph to compare against.
-- Use each of the partially trained to train a new model for 10, 20 and 30
-epochs (separate trials, start first with 20), but only allow half of the
-weights in this new model to change. Save each "stage 2" model to a new file.
-- Train each of the "stage 2" models to convergence, but now allow all of the
-weights to change.
-- Also fix a subset of the weights of the converged model, and see if
+- Train the fused models to convergence.
+- Train a baseline model for 200 epochs so that we can compare train/validation
+accuracy plots.
+- Create plots.
+
+- Also fix a subset of the weights of the converged baseline model, and see if
 optimizing a smaller set of weights allows us to escape local minima.
   - Instead of fixing half the weights, try fixing smaller fractions to see if
   this helps. We would need to try different subsets this time, instead of just
@@ -30,4 +27,13 @@ strategies that work best:
   - Random kernels instead of fixed ones.
   - Random sampling.
 
+- Parititon the kernels in each layer into sets, based on the sum of the
+magnitudes of the components of the hessian corresponding to the interaction
+between each pair of kernels.
+  - We can find the sum of the values of the components (not absolute values)
+  by performing hessian-vector multiplications, which can be implemented
+  efficiently.
+  - This is related to the pruning strategy discussed in OBD.
+
 - Visualization of weights over time.
+- Changing the subsets of weights that are optimized over time.
