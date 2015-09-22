@@ -23,8 +23,6 @@ task :train_half_fixed_models do
 				"-model cnn_3x3_#{p}_max_#{m}_1st_half"
 		end
 	end
-
-	Rake::Task[:all].invoke
 end
 
 task :train_fused_models do
@@ -43,8 +41,6 @@ task :train_fused_models do
 				"-right_half_dir #{rdir}"
 		end
 	end
-
-	Rake::Task[:all].invoke
 end
 
 task :train_one_shot_model do
@@ -52,6 +48,4 @@ task :train_one_shot_model do
 		"-max-epochs 200 "                \
 		"-task replace "                  \
 		"-model cnn_3x3_full_v2"
-
-	Rake::Task[:all].invoke
 end
