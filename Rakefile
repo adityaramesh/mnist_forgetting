@@ -45,7 +45,7 @@ end
 
 task :train_one_shot_model do
 	sh "th source/drivers/train_full_v2.lua " \
-		"-max-epochs 200 "                \
+		"-max_epochs 200 "                \
 		"-task replace "                  \
 		"-model cnn_3x3_full_v2"
 end

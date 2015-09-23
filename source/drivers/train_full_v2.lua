@@ -11,19 +11,6 @@ function options_func(cmd)
 		"current model.")
 end
 
-function get_model_info(opt)
-	local model_fn = "model_" .. opt.pretrained_epochs .. "_epochs.t7"
-	local model_path = paths.concat("models/cnn_3x3_full", model_fn)
-
-	print("Loading model " .. model_fn .. ".")
-	local model = torch.load(model_path)
-
-	return {
-		model = model:cuda(),
-		criterion = nn.ClassNLLCriterion():cuda()
-	}
-end
-
 function get_train_info(opt)
         return {
                 opt_state = {
