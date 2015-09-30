@@ -12,3 +12,14 @@ print("Fifth layer params:")
 print(p5)
 print("Fifth layer grad params:")
 print(g5)
+
+local conv_layers = model:findModules("nn.SpatialConvolutionMM")
+for i = 1, #conv_layers do
+	local p, g = conv_layers[i]:parameters()
+	print("Conv layer " .. i .. " parameters:")
+	print(p)
+	print("Conv layer " .. i .. " grad parameters:")
+	print(g)
+	print("Output?")
+	print(conv_layers[i].output)
+end
