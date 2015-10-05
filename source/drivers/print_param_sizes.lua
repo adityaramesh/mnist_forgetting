@@ -1,9 +1,12 @@
-require "source/models/cnn_3x3.lua"
+require "source/models/cnn_5x5_mnist.lua"
 
 local info = get_model_info()
 local model = info.model
+local p1, g1 = model:get(1):parameters()
 local p2, g2 = model:get(2):parameters()
 local p5, g5 = model:get(5):parameters()
+print("First layer params:")
+print(p1)
 print("Second layer params:")
 print(p2)
 print("Second layer grad params:")

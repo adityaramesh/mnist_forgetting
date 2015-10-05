@@ -8,10 +8,27 @@ weights were allowed to vary simultaneously?
 
 # Agenda
 
-- Train the fused models to convergence.
-- Train a baseline model for 200 epochs so that we can compare train/validation
-accuracy plots.
-- Create plots.
+- modified version of model arch file to use fused halves (don't use seeded
+parameters for the linear layer before the softmax)
+- above for baseline models
+- run the shit on device 2
+
+- difference between fixing half the parameters and just training twos model,
+each half the size? it may make more sense to do the latter, since we won't
+have to compute gradients based on parameters that are random and frozen. think
+about implementing this.
+- idea based on this: if we have an ensemble, then we could consider fusing all
+of them together into a "mutant" ensemble and optimizing it. note: major
+problems with doing this naively: memory issues, as well as overfitting since
+the mutant model will be very "wide"
+  - approach 1: need some way to get rid of redundant parameters along the way
+  (pruning over feature maps?) and restructuring the network dynamically.
+  - approach 2: only fuse the models at the final linear + softmax layer, i.e.
+  don't the convolutional layers together. this makes training tractible and
+  parallelizable. this idea is likely very similar to the "inception" module
+  technique.
+
+# Future Ideas
 
 - Also fix a subset of the weights of the converged baseline model, and see if
 optimizing a smaller set of weights allows us to escape local minima.
@@ -37,3 +54,4 @@ between each pair of kernels.
 
 - Visualization of weights over time.
 - Changing the subsets of weights that are optimized over time.
+- Using elastic averaging or soft weight sharing.
