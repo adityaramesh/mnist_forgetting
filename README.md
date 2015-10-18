@@ -4,24 +4,12 @@ Experiments involving catastrophic forgetting with MNIST.
 
 # Agenda
 
-- Parameters of function that defines model arch:
-  - Depth.
-
-- Other model arch files:
-  - One file to simply load a model given the path as a command-line argument.
-  - One file to fuse two models together given the paths to the left and right
-  halves. Should work regardless of depth of models.
-  - One file with implementation of nested submodels.
-
-- Optimizer: use the same adadelta configuration for everything.
 - Rake tasks for preprocessing data, and one rake task for each experiment.
+- Optimizer: use the same adadelta configuration for everything.
 - Use 30 epochs for all models.
 - Perhaps make the grad modification function an extra CLI argument.
 
-- Extra parameter: how many samples of digits 5--9 to use.
-  - Experiment by hand first to see how the accuracy changes before doing this.
-
-# Further Questions
+# Future Questions
 
 - Is it always best to fix half of the weights? What if we fix a smaller or
 larger fraction?

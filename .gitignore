@@ -19,5 +19,5 @@ __pycache__
 *.out
 
 # Local files.
-data
-models
+/data
+/models
