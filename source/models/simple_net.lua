@@ -4,7 +4,7 @@ require "cunn"
 local class = require "class"
 simple_net = class("simple_net")
 
-function simple_net:__init(input_shape, outputs, depth)
+function simple_net:__init(input_shape, outputs, depth, grad_mod_func)
 	local inputs = 1
 	for i = 1, #input_shape do
 		inputs = inputs * input_shape[i]
@@ -14,9 +14,10 @@ function simple_net:__init(input_shape, outputs, depth)
 	assert(outputs > 0)
 	assert(depth >= 1)
 
-	self.input_shape  = input_shape
-	self.output_shape = torch.LongStorage{outputs}
-	self.model        = nn.Sequential()
+	self.input_shape   = input_shape
+	self.output_shape  = torch.LongStorage{outputs}
+	self.model         = nn.Sequential()
+	self.grad_mod_func = grad_mod_func
 
 	self.model:add(nn.View(inputs))
 
@@ -66,5 +67,9 @@ function simple_net:evaluate(batch)
 	local state = self:predict(batch)
 	self.model:backward(batch.inputs, self.criterion:backward(
 		state.outputs, batch.targets))
+
+	if self.grad_mod_func then
+		self.grad_mod_func(self, batch)
+	end
 	return state
 end
