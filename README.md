@@ -4,27 +4,7 @@ Experiments involving catastrophic forgetting with MNIST.
 
 # Agenda
 
-- Which parameters to keep in code:
-  - Optimization algorithm.
-- Which parametrs to specify using CLI args:
-  - Model file. (make a parameter of model io)
-  - Data provider file. (parameter of model io)
-  - Name of file with optimization algorithm? The file itself can accept CLI
-  parameters, if necessary.
-  - A
-
-- Other stuff:
-  - Cleaner way to update epochs.
-  - Alternative to nn.Confusion.
-
-- Features in run_model file:
-  - Custom gradient masking function (defaults to no-op). We need a utility
-  file to do this, with support for detecting which layers to mask without any
-  extra parameters.
-  - Function to draw samples from the data (need to allow training on two
-  objectives simultaneously).
-
-- Features of function that defines model arch:
+- Parameters of function that defines model arch:
   - Depth.
 
 - Other model arch files:
@@ -47,14 +27,19 @@ Experiments involving catastrophic forgetting with MNIST.
 larger fraction?
 
 - For CNNs, what's the difference between fixing half the feature maps and
-choosing half the weights arbitrarily?
+choosing half of the weights arbitrarily?
 
-- Changing the subsets of weights that are optimized over time.
+- Changing the subsets of weights that are optimized over time. Coordinate
+descent?
 
 - When two model halves are fused together, does the optimizer change all of
 the feature maps by an equal amount, or are some changed disproportionately
 compared to others? If the latter case holds, what qualitative properties do
 these feature maps have?
+  - Hypothesis: the feature maps that change should fall into two categories:
+    1. Those that are changed to eliminate redundancy.
+    2. Those that are changed to allow the model to discriminate between the
+    first task and the second.
 
 - Partition the kernels in each layer into sets, based on the sum of the
 magnitudes of the components of the Hessian that correspond to the interaction
@@ -66,6 +51,7 @@ between each pair of kernels.
 
 - Using elastic averaging or soft weight sharing to prevent models or subsets
 of weights trained on different objectives from diverging from one another.
+  - This is the same as Yann's suggestion to use elastic net regularization.
 
 - Application to combining ensemble models into a single model. How to fuse the
 individual models together?
