@@ -120,6 +120,9 @@ function make_context(info, class_count)
 		end
 
 		model:backward(input, criterion:backward(output, target))
+		if modify_grad_func then
+			modify_grad_func(model)
+		end
 		return loss
 	end
 
@@ -143,7 +146,7 @@ function run(task_info_func, model_info_func, train_info_func)
 		info.train.epoch = info.train.epoch + 1
 	end
 
-	local context = make_context(info, class_count)
+	local context = make_context(info, class_count, modify_grad_func)
 	local valid_epoch_ratio = info.train.valid_epoch_ratio or 1
 	print("")
 
