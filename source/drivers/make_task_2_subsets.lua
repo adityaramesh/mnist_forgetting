@@ -28,7 +28,7 @@ end
 
 assert(count == sum)
 
-local subset_size = 200
+local subset_size = 1000
 local classes = 5
 local instances_per_class = subset_size / classes
 
