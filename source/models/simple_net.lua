@@ -15,7 +15,7 @@ function simple_net:__init(input_shape, outputs, depth, grad_mod_func)
 	assert(depth >= 1)
 
 	self.input_shape   = input_shape
-	self.output_shape  = torch.LongStorage{outputs}
+	self.output_shape_ = torch.LongStorage{outputs}
 	self.model         = nn.Sequential()
 	self.grad_mod_func = grad_mod_func
 
@@ -54,17 +54,18 @@ function simple_net:input_shape()
 end
 
 function simple_net:output_shape()
-	return self.output_shape
+	return self.output_shape_
 end
 
 function simple_net:predict(batch)
 	local outputs = self.model:forward(batch.inputs)
 	local loss = self.criterion:forward(outputs, batch.targets)
-	return {outputs = outputs loss = loss}
+	return {outputs = outputs, loss = loss}
 end
 
 function simple_net:evaluate(batch)
 	local state = self:predict(batch)
+	self.grad_params:zero()
 	self.model:backward(batch.inputs, self.criterion:backward(
 		state.outputs, batch.targets))
 
