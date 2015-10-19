@@ -9,17 +9,18 @@ local count = data.inputs:size(1)
 local width = data.inputs:size(2)
 
 print("Computing indices of instances in each class.")
-local indices = {}
 local sum = 0
+local range = torch.range(1, count)
+local indices = {}
 
 for i = 1, 5 do
 	if is_reindexed == "true" then
 		local t = torch.eq(data.targets, i)
-		indices[i] = data.targets[t]
+		indices[i] = range[t]
 		sum = sum + t:sum()
 	elseif is_reindexed == "false" then
 		local t = torch.eq(data.targets, i + 5)
-		indices[i] = data.targets[t]
+		indices[i] = range[t]
 		sum = sum + t:sum()
 	else
 		error("Invalid value `" .. is_reindexed .. "` for argument three.")
@@ -28,9 +29,10 @@ end
 
 assert(count == sum)
 
-local subset_size = 1000
+local subset_size = 500
 local classes = 5
 local instances_per_class = subset_size / classes
+print("Using " .. instances_per_class .. " instances per class.")
 
 print("Computing indices for data partitions.")
 local partition_indices = torch.Tensor(subset_size)
@@ -44,13 +46,14 @@ end
 
 print("Forming subset.")
 local perm    = torch.randperm(subset_size)
-local images  = torch.FloatTensor(subset_size, width, width)
+local inputs  = torch.FloatTensor(subset_size, width, width)
 local targets = torch.IntTensor(subset_size)
 
 for i = 1, subset_size do
 	local index = partition_indices[perm[i]]
-	images[{{i}}]:copy(data.inputs[{{index}}])
+	inputs[{{i}}]:copy(data.inputs[{{index}}])
 	targets[{{i}}]:copy(data.targets[{{index}}])
+	--print(data.targets[index])
 end
 
 print("Saving data.")
