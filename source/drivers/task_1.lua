@@ -10,40 +10,50 @@ local function extra_options(cmd)
 end
 
 local info = lantern.parse_options(extra_options)
-assert(string.len(info.train_file_1) >= 1)
-assert(info.depth >= 2)
+local opt = lantern.options
+
+assert(string.len(opt.train_file_1) >= 1)
+assert(opt.depth >= 2)
 
 local train_files
-if string.len(info.train_file_2) == 0 then
-	train_files = {info.train_file_1}
+if string.len(opt.train_file_2) == 0 then
+	train_files = {opt.train_file_1}
 else
-	train_files = {info.train_file_1, info.train_file_2}
+	train_files = {opt.train_file_1, opt.train_file_2}
 end
 
 local masking_strategy
-if info.masking_strategy == "first" then
+if opt.masking_strategy == "first" then
 	masking_strategy = mask_on_first_task()
-elseif info.masking_strategy == "both" then
+elseif opt.masking_strategy == "both" then
 	masking_strategy = mask_on_both_tasks()
 else
-	assert(masking_strategy == "none")
+	assert(opt.masking_strategy == "none")
 end
 
 local bp = lantern.batch_provider({
 	train_files       = train_files,
-	test_file         = "data/mnist/partitioned_8x8/test_task_2_small.t7",
+	test_file         = "data/mnist/partitioned_8x8/test_task_2.t7",
 	target            = "gpu",
 	batch_size        = 200,
 	sampling_strategy = "alternating"
 })
 
-local model = simple_net(torch.LongStorage{8, 8}, 10, info.depth, masking_strategy)
+local model = simple_net(torch.LongStorage{8, 8}, 10, opt.depth,
+	masking_strategy)
+
+local optim = lantern.optimizers.sgu(model, {
+	learning_rate = lantern.schedule.gentle_decay(1e-2, 1e-4),
+	momentum      = lantern.schedule.constant(0.95),
+	momentum_type = lantern.momentum.nag
+})
 
 lantern.run({
 	model        = info.model or model,
-	driver       = lantern.driver(bp)
+	driver       = lantern.driver(bp),
 	perf_metrics = {"accuracy"},
 	model_dir    = info.model_dir,
 	optimizer    = info.optimizer,
-	history      = info.history
+	history      = info.history,
+	optimizer    = optim
 })
