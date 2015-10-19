@@ -1,5 +1,4 @@
 require "torch"
-require "image"
 
 local train_fp                 = arg[1]
 local test_fp                  = arg[2]
@@ -10,8 +9,8 @@ local train_task_2_reind_fp    = arg[6]
 local test_task_2_fp           = arg[7]
 local test_task_2_reind_fp     = arg[8]
 
-local train_data = torch.load(train_fp)
-local test_data  = torch.load(test_fp)
+local train = torch.load(train_fp)
+local test  = torch.load(test_fp)
 
 local train_count = train.inputs:size(1)
 local width       = train.inputs:size(2)
@@ -46,7 +45,7 @@ for i = 1, train_count do
 		train_task_1_index = train_task_1_index + 1
 		train_task_1_images[train_task_1_index]:copy(train.inputs[i])
 	else
-		train_task_2_index = train_task_2_index + 2
+		train_task_2_index = train_task_2_index + 1
 		train_task_2_images[train_task_2_index]:copy(train.inputs[i])
 	end
 end
