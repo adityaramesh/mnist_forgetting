@@ -64,10 +64,10 @@ end
 lantern.run({
 	model        = info.model or model,
 	driver       = lantern.driver(bp),
-	perf_metrics = {"accuracy"},
+	perf_metrics = {"accuracy", "gradient_norm"},
 	model_dir    = info.model_dir,
 	optimizer    = info.optimizer,
 	history      = info.history,
 	optimizer    = optim,
-	stop_crit    = lantern.criterion.max_epochs(50)
+	stop_crit    = lantern.criterion.max_epochs(30)
 })

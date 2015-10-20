@@ -25,12 +25,12 @@ function simple_net:__init(input_shape, outputs, depth, grad_mod_func)
 		self.model:add(nn.Linear(inputs, outputs))
 	else
 		self.model:add(nn.Linear(inputs, 512))
-		self.model:add(nn.BatchNormalization(512))
+		--self.model:add(nn.BatchNormalization(512))
 		self.model:add(nn.ReLU())
 
 		for i = 1, depth - 2 do
 			self.model:add(nn.Linear(512, 512))
-			self.model:add(nn.BatchNormalization(512))
+			--self.model:add(nn.BatchNormalization(512))
 			self.model:add(nn.ReLU())
 		end
 
