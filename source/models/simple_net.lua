@@ -66,6 +66,13 @@ function simple_net:predict(batch)
 end
 
 function simple_net:evaluate(batch)
+	-- Use this when gradient summation is not desired.
+	--self.grad_params:zero()
+	--local state = self:predict(batch)
+	--self.model:backward(batch.inputs, self.criterion:backward(
+	--	state.outputs, batch.targets))
+	--return state
+
 	local state = self:predict(batch)
 
 	if batch.targets[1] <= 5 then

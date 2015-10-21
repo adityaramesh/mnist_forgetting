@@ -1,6 +1,9 @@
 require "lantern"
-require "source/models/simple_net"
-require "source/utility/masking_strategy"
+--require "source/models/simple_net"
+require "source/models/split_net"
+--require "source/utility/masking_strategy"
+require "source/utility/masking_strategy_split"
+require "source/utility/alternating_update_driver"
 
 local function extra_options(cmd)
 	cmd:option("-train_file_1",     "",    "First training file.")
@@ -51,20 +54,23 @@ local bp = lantern.batch_provider({
 	train_files       = train_files,
 	test_file         = test_file,
 	target            = "gpu",
-	batch_size        = 200,
+	batch_size        = 50,
 	sampling_strategy = "alternating"
 })
 
 local width = bp.train_data[1].inputs:size(2)
 assert(width == bp.train_data[1].inputs:size(3))
 
-local model = simple_net(torch.LongStorage{width, width}, outputs, opt.depth,
-	opt.with_bn, masking_strategy)
+--local model = simple_net(torch.LongStorage{width, width}, outputs, opt.depth,
+--	opt.with_bn, masking_strategy)
+
+local model = split_net(torch.LongStorage{width, width}, outputs, 50,
+	opt.depth, opt.with_bn, masking_strategy)
 
 local optim
 if opt.depth == 2 then
 	optim = lantern.optimizers.sgu(model, {
-		learning_rate = lantern.schedule.gentle_decay(1e-2, 1e-4),
+		learning_rate = lantern.schedule.gentle_decay(1e-3, 1e-5),
 		momentum      = lantern.schedule.constant(0.95),
 		momentum_type = lantern.momentum.nag
 	})
@@ -79,11 +85,15 @@ end
 
 lantern.run({
 	model        = info.model or model,
-	driver       = lantern.driver(bp),
+	driver       = alternating_update_driver(bp),
+	-- Use this when gradient summation is not desired. Also look at the
+	-- `evaluate` function of the model class in case further changes are
+	-- necessary.
+	--driver       = lantern.driver(bp),
 	perf_metrics = {"accuracy", "gradient_norm"},
 	model_dir    = info.model_dir,
 	optimizer    = info.optimizer,
 	history      = info.history,
 	optimizer    = optim,
-	stop_crit    = lantern.criterion.max_epochs(30)
+	stop_crit    = lantern.criterion.max_epochs(200000000)
 })

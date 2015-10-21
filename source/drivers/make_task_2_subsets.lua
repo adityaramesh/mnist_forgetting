@@ -29,7 +29,7 @@ end
 
 assert(count == sum)
 
-local subset_size = 500
+local subset_size = 50
 local classes = 5
 local instances_per_class = subset_size / classes
 print("Using " .. instances_per_class .. " instances per class.")

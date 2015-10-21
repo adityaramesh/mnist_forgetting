@@ -4,20 +4,9 @@ Experiments involving catastrophic forgetting with MNIST.
 
 # Agenda
 
-- parameters for model driver script:
-  - sampling strategy
-  - gradient masking function (none should be valid)
-  - the above parameters should cover cases 1--5
-
-- separate script to train only on only one task, with given number of softmax
-  outputs. use to
-  - train on 5--9 only (use reindexed version of digits 5--9)
-  - train first on 0--4, then 5--9
-
-- Rake tasks for preprocessing data, and one rake task for each experiment.
-- Optimizer: use the same adadelta configuration for everything.
-- Use 30 epochs for all models.
-- Perhaps make the grad modification function an extra CLI argument.
+- Implement `split_net`.
+- First try without gradient masking, then add gradient masking using a separate
+  file. We need to use `gModule.fg:topsort()`.
 
 # Future Questions
 
