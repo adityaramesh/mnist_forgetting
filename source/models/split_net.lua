@@ -50,29 +50,6 @@ function split_net:__init(input_shape, outputs, batch_size, depth, use_bn, grad_
 
 	-- Storage for temporary data.
 	self.prev_grads = torch.CudaTensor(batch_size, outputs)
-	self.dummy_grads = torch.CudaTensor(batch_size, outputs):zero()
-
-	-- for alternating weight mask idea that didn't work
-	--self.weight_mask_1 = torch.CudaTensor(512, 512):zero()
-	--self.bias_mask_1 = torch.CudaTensor(512):zero()
-	--self.weight_mask_2 = torch.CudaTensor(512, 512):zero()
-	--self.bias_mask_2 = torch.CudaTensor(512):zero()
-
-	--for i = 1, 512 do
-	--	if i % 2 == 1 then
-	--		self.bias_mask_1[i] = 1
-	--	else
-	--		self.bias_mask_2[i] = 1
-	--	end
-
-	--	for j = 1, 512 do
-	--		if j % 2 == 1 then
-	--			self.weight_mask_1[{i, j}] = 1
-	--		else
-	--			self.weight_mask_2[{i, j}] = 1
-	--		end
-	--	end
-	--end
 end
 
 function split_net:parameters()
@@ -116,27 +93,10 @@ function split_net:evaluate(batch)
 		local loss = self.criterion:forward(outputs, batch.targets)
 		state = {outputs = outputs, loss = loss}
 
-		-- XXX
-		--self.model:backward(batch.inputs, {
-		--	self.prev_grads,
-		--	self.criterion:backward(outputs, batch.targets)
-		--})
-
 		self.model:backward(batch.inputs, {
 			self.prev_grads,
-			self.dummy_grads
-		})
-
-		if self.grad_mod_func then
-			self.grad_mod_func(self, batch)
-		end
-
-		self.model:backward(batch.inputs, {
-			self.dummy_grads,
 			self.criterion:backward(outputs, batch.targets)
 		})
-
-		mask_on_second_task(self, batch)
 	end
 
 	return state
