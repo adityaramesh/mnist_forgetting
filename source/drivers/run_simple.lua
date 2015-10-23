@@ -1,9 +1,12 @@
 require "lantern"
 --require "source/models/simple_net"
-require "source/models/split_net"
+--require "source/models/split_net"
+require "source/models/weird_net"
 --require "source/utility/masking_strategy"
 require "source/utility/masking_strategy_split"
-require "source/utility/alternating_update_driver"
+--require "source/utility/alternating_update_driver"
+require "source/utility/weird_net_driver"
+require "source/utility/weird_adadelta_lm"
 
 local function extra_options(cmd)
 	cmd:option("-train_file_1",     "",    "First training file.")
@@ -64,36 +67,47 @@ assert(width == bp.train_data[1].inputs:size(3))
 --local model = simple_net(torch.LongStorage{width, width}, outputs, opt.depth,
 --	opt.with_bn, masking_strategy)
 
-local model = split_net(torch.LongStorage{width, width}, outputs, 50,
-	opt.depth, opt.with_bn, masking_strategy)
+--local model = split_net(torch.LongStorage{width, width}, outputs, 50,
+--	opt.depth, opt.with_bn, masking_strategy)
 
-local optim
-if opt.depth == 2 then
-	optim = lantern.optimizers.sgu(model, {
-		learning_rate = lantern.schedule.gentle_decay(1e-3, 1e-5),
-		momentum      = lantern.schedule.constant(0.95),
-		momentum_type = lantern.momentum.nag
-	})
-elseif opt.depth == 5 then
-	optim = lantern.optimizers.adadelta_lm(model, {
-		learning_rate = lantern.schedule.constant(1),
-		momentum_type = lantern.momentum.none
-	})
-else
-	error("Don't know which optimizer to use for depth = " .. depth .. ".")
-end
+local model = weird_net(torch.LongStorage{width, width}, outputs)
+
+--local optim
+--if opt.depth == 2 then
+--	optim = lantern.optimizers.sgu(model, {
+--		learning_rate = lantern.schedule.gentle_decay(1e-3, 1e-5),
+--		momentum      = lantern.schedule.constant(0.95),
+--		momentum_type = lantern.momentum.nag
+--	})
+--elseif opt.depth == 5 then
+--	optim = lantern.optimizers.adadelta_lm(model, {
+--		learning_rate = lantern.schedule.constant(1),
+--		momentum_type = lantern.momentum.none
+--	})
+--else
+--	error("Don't know which optimizer to use for depth = " .. depth .. ".")
+--end
+
+-- TODO initialize weird optimizer
 
 lantern.run({
 	model        = info.model or model,
-	driver       = alternating_update_driver(bp),
+	-- XXX
+	--driver       = alternating_update_driver(bp),
+	driver       = weird_net_driver(bp),
 	-- Use this when gradient summation is not desired. Also look at the
 	-- `evaluate` function of the model class in case further changes are
 	-- necessary.
 	--driver       = lantern.driver(bp),
-	perf_metrics = {"accuracy", "gradient_norm"},
+	perf_metrics = {"accuracy"},-- XXX, "gradient_norm"},
 	model_dir    = info.model_dir,
 	optimizer    = info.optimizer,
 	history      = info.history,
-	optimizer    = optim,
+	-- XXX
+	-- optimizer = optim
+	optimizer    = weird_adadelta_lm(model, {
+		learning_rate = lantern.schedule.constant(1),
+		momentum_type = lantern.momentum.none
+	}),
 	stop_crit    = lantern.criterion.max_epochs(200000000)
 })

@@ -123,7 +123,6 @@ function split_net:evaluate(batch)
 	--		self.prev_grads,
 	--		self.criterion:backward(outputs, batch.targets)
 	--	})
-	--	self.grad_params:mul(5)
 	--end
 
 	--return state
